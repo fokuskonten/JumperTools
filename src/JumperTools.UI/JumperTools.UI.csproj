@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <UseWPF>true</UseWPF>
+    <RootNamespace>JumperTools.UI</RootNamespace>
+    <AssemblyName>JumperTools</AssemblyName>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <ApplicationIcon>Resources\app.ico</ApplicationIcon>
+    <Title>JumperTools</Title>
+    <Product>JumperTools</Product>
+    <Company>JumperTools Official</Company>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <IncludeAllContentForSelfExtract>true</IncludeAllContentForSelfExtract>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="MaterialDesignThemes" Version="4.9.0" />
+    <PackageReference Include="MaterialDesignColors" Version="2.1.4" />
+    <PackageReference Include="Fluent.Ribbon" Version="9.0.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="SQLitePCLRaw.bundle_green" Version="2.1.6" />
+    <PackageReference Include="sqlite-net-pcl" Version="1.8.116" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\JumperTools.Models\JumperTools.Models.csproj" />
+    <ProjectReference Include="..\JumperTools.Data\JumperTools.Data.csproj" />
+    <ProjectReference Include="..\JumperTools.Core\JumperTools.Core.csproj" />
+    <ProjectReference Include="..\JumperTools.Services\JumperTools.Services.csproj" />
+    <ProjectReference Include="..\JumperTools.Utilities\JumperTools.Utilities.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resources\**\*" />
+  </ItemGroup>
+
+</Project>

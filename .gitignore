@@ -1,0 +1,41 @@
+# ==============================================================================
+# JUMPERTOOLS - ENTERPRISE CLEAN GITIGNORE
+# ==============================================================================
+
+# 1. Build Outputs, Binaries & Compilations
+bin/
+obj/
+build/
+*.exe
+*.dll
+*.pdb
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.vs/
+*.log
+output.log
+logs/
+backups/
+
+# 2. Massive Firmware, Databases & Binary Tools (Zero-Bloat Rule)
+database/
+tools/
+runtimes/
+Firehose-Finder-master/
+scratch/
+
+# 3. Master License Keys & Secrets (Zero-Leak Rule)
+*LICENSE*
+*KUNCI_LISENSI*
+*.key
+*.pfx
+*.p12
+*.snk
+.env*
+config/
+
+# 4. OS & Cache Files
+Thumbs.db
+.DS_Store

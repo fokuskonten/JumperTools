@@ -1,0 +1,74 @@
+<UserControl x:Class="JumperTools.UI.Views.Tabs.PartitionManagerTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <Grid Margin="0,8,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Border Grid.Row="0" Style="{StaticResource ModernEnterpriseCard}" Padding="14,12" Margin="0,0,0,8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                
+                <!-- Row 0: Title and Subtitle -->
+                <StackPanel Grid.Row="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,10">
+                    <TextBlock Text="Tabel Partisi Flash (eMMC / UFS)" FontWeight="Bold" FontSize="14" Foreground="#0F172A"/>
+                    <Button Style="{StaticResource SmallInfoBadgeButton}" Command="{Binding ShowFeatureGuideCommand}" CommandParameter="Tab_PartitionGpt" ToolTip="Panduan &amp; Informasi Manajer Partisi GPT"/>
+                    <TextBlock Text="— Backup (.img), Flash, atau Hapus partisi smartphone" Foreground="#64748B" FontSize="11.5" Margin="6,1,0,0"/>
+                </StackPanel>
+
+                <!-- Row 1: Action Buttons (WrapPanel: zero overlap) -->
+                <WrapPanel Grid.Row="1" Orientation="Horizontal">
+                    <Button Style="{StaticResource ModernPrimaryButton}" Background="#0284C7" BorderBrush="#0284C7" Content="🔄 Baca Partisi (Read GPT)" Command="{Binding RefreshLivePartitionTableCommand}" Margin="0,0,8,6" Padding="12,6" FontSize="11.5"/>
+                    <Button Style="{StaticResource ModernActionButton}" Content="📊 Status Risiko Partisi" Command="{Binding ShowFeatureGuideCommand}" CommandParameter="Tab_PartitionGpt" Margin="0,0,8,6" Padding="12,6" FontSize="11.5" ToolTip="Lihat panduan risiko tiap level partisi"/>
+                    <Button Style="{StaticResource ModernActionButton}" Content="📥 Backup Partisi (.img)" Command="{Binding ReadPartitionCommand}" Margin="0,0,8,6" Padding="12,6" FontSize="11.5" IsEnabled="{Binding HasPartitionSelected}" ToolTip="Pilih partisi dari tabel terlebih dahulu"/>
+                    <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash Partisi" Command="{Binding WritePartitionCommand}" Margin="0,0,8,6" Padding="12,6" FontSize="11.5" IsEnabled="{Binding HasPartitionSelected}" ToolTip="Pilih partisi dari tabel terlebih dahulu"/>
+                    <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Hapus Partisi (Erase)" Command="{Binding ErasePartitionCommand}" Margin="0,0,0,6" Padding="12,6" FontSize="11.5" IsEnabled="{Binding HasPartitionSelected}" ToolTip="DESTRUKTIF — Pilih partisi dan baca risiko sebelum erase"/>
+                </WrapPanel>
+            </Grid>
+        </Border>
+
+        <Border Grid.Row="1" Style="{StaticResource ModernEnterpriseCard}" Padding="4">
+            <Grid>
+                <DataGrid ItemsSource="{Binding Partitions}" SelectedItem="{Binding SelectedPartition}" AutoGenerateColumns="False" IsReadOnly="True" CanUserAddRows="False" SelectionMode="Single">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Nama Partisi" Binding="{Binding Name}" FontWeight="Bold" Width="150"/>
+                        <DataGridTextColumn Header="Ukuran" Binding="{Binding SizeFormatted}" Width="100"/>
+                        <DataGridTextColumn Header="Sektor Awal" Binding="{Binding StartSector, StringFormat='0x{0:X8}'}" Width="120"/>
+                        <DataGridTextColumn Header="Jumlah Sektor" Binding="{Binding SectorCount}" Width="120"/>
+                        <DataGridTemplateColumn Header="Tingkat Risiko &amp; Kategori Partisi" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,4">
+                                        <Border Background="{Binding RiskBadgeColor}" CornerRadius="4" Padding="8,3" Margin="0,0,8,0">
+                                            <TextBlock Text="{Binding RiskLevel}" Foreground="#FFFFFF" FontWeight="Bold" FontSize="10.5"/>
+                                        </Border>
+                                        <TextBlock Text="{Binding RiskDescription}" FontSize="11.5" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <!-- Empty State Guide -->
+                <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="32,24" Visibility="{Binding HasNoPartitions, Converter={StaticResource BoolToVisConverter}}">
+                    <StackPanel HorizontalAlignment="Center">
+                        <TextBlock Text="📑 Tabel Partisi Belum Dibaca" FontWeight="Bold" FontSize="14" Foreground="{StaticResource TextPrimaryBrush}" HorizontalAlignment="Center" Margin="0,0,0,6"/>
+                        <TextBlock Text="Klik tombol di bawah untuk membaca tabel partisi (eMMC / UFS) langsung dari HP yang terhubung." Foreground="{StaticResource TextSecondaryBrush}" FontSize="11.5" TextWrapping="Wrap" MaxWidth="460" TextAlignment="Center" Margin="0,0,0,12"/>
+                        <Button Style="{StaticResource ModernPrimaryButton}" Background="#0284C7" BorderBrush="#0284C7" Content="🔄 Baca Partisi dari HP (Read GPT)" Command="{Binding RefreshLivePartitionTableCommand}" HorizontalAlignment="Center" Padding="14,5" FontSize="11.5" FontWeight="Bold"/>
+                    </StackPanel>
+                </Border>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

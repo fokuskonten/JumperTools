@@ -1,0 +1,750 @@
+﻿<UserControl x:Class="JumperTools.UI.Views.Tabs.UnlockServicesTabView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000">
+    <Grid Margin="0,2,0,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Row 0: Hardware Status & Quick Target Bar -->
+            <RowDefinition Height="Auto"/> <!-- Row 1: 1-Click Platform Tab Strip -->
+            <RowDefinition Height="Auto"/> <!-- Row 2: Compact Service Action Canvas (Snug, Zero Void) -->
+            <RowDefinition Height="Auto"/> <!-- Row 3: Live Operation Progress -->
+            <RowDefinition Height="*" MinHeight="180"/> <!-- Row 4: Docked Live Terminal Console (Fills 100% Canvas) -->
+        </Grid.RowDefinitions>
+
+        <!-- ROW 0: HARDWARE CONNECTION & TARGET MODEL BAR (ENLARGED & CLEAR) -->
+        <Border Grid.Row="0" Style="{StaticResource ModernEnterpriseCard}" Padding="12,8" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left: Live Connected Device Badges -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="{Binding DeviceStatusBgColor}" BorderBrush="{Binding DeviceStatusBorderColor}" BorderThickness="1" CornerRadius="5" Padding="10,5" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Ellipse Width="8" Height="8" Fill="{Binding DeviceStatusDotColor}" VerticalAlignment="Center" Margin="0,0,6,0"/>
+                            <TextBlock Text="USB: " FontWeight="Bold" FontSize="11.5" Foreground="{Binding DeviceStatusTextColor}"/>
+                            <TextBlock Text="{Binding SelectedDevice.Model, FallbackValue='Menunggu HP Terhubung', TargetNullValue='Menunggu HP Terhubung'}" FontWeight="Bold" FontSize="11.5" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="9,5" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Port: " FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding SelectedDevice.DeviceId, FallbackValue='Auto COM / USB', TargetNullValue='Auto COM / USB'}" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="9,5" Margin="0,0,8,0">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="SoC: " FontSize="11" Foreground="{StaticResource TextSecondaryBrush}"/>
+                            <TextBlock Text="{Binding SelectedDevice.Chipset, FallbackValue='Auto Detect', TargetNullValue='Auto Detect'}" FontWeight="SemiBold" FontSize="11" Foreground="{StaticResource TextPrimaryBrush}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Center: Target Phone Model Search -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="10,0,10,0">
+                    <TextBlock Text="Target Model:" FontWeight="Bold" FontSize="11.5" Foreground="{StaticResource TextPrimaryBrush}" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <TextBox Text="{Binding ModelSearchFilter, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource SharpTextBox}" Width="145" Height="30" FontSize="11.5" VerticalContentAlignment="Center" Margin="0,0,6,0" materialDesign:HintAssist.Hint="Ketik seri HP..."/>
+                    <ComboBox ItemsSource="{Binding FilteredModels}" SelectedItem="{Binding SelectedPhoneModel}" Width="210" Height="30" FontSize="11.5" VerticalContentAlignment="Center" Background="#FFFFFF" materialDesign:HintAssist.Hint="Pilih Model HP..." materialDesign:HintAssist.IsFloating="False">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="{Binding Brand}" FontWeight="Bold" Foreground="#0284C7" Margin="0,0,4,0"/>
+                                    <TextBlock Text="{Binding ModelName}" FontWeight="SemiBold"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+                <!-- Right: Hardware Bus Tools -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource ModernPrimaryButton}" Content="🔄 Scan USB" Command="{Binding RefreshDevicesCommand}" Padding="14,6" FontSize="11" FontWeight="SemiBold" Margin="0,0,6,0" ToolTip="Scan ulang port COM dan perangkat USB"/>
+                    <Button Style="{StaticResource ModernSecondaryButton}" Content="⚡ Reset Port" Command="{Binding ForceResetUsbPortsCommand}" Padding="12,6" FontSize="11" FontWeight="SemiBold" Margin="0,0,6,0" ToolTip="Restart port COM dan filter driver"/>
+                    <Button Style="{StaticResource ModernActionButton}" Content="📂 Driver" Command="{Binding OpenDriversFolderCommand}" Padding="12,6" FontSize="11" ToolTip="Buka folder database installer driver USB"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ROW 1: 1-CLICK PLATFORM TAB STRIP (LARGE & CLEAR TABS) -->
+        <Border Grid.Row="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="4,3" Margin="0,0,0,8">
+            <ListBox ItemsSource="{Binding ProtocolList}" SelectedIndex="{Binding SelectedBrandTabIndex, Mode=TwoWay}" Background="Transparent" BorderThickness="0" ScrollViewer.HorizontalScrollBarVisibility="Disabled" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+                <ListBox.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Rows="1" Columns="10"/>
+                    </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemContainerStyle>
+                    <Style TargetType="ListBoxItem">
+                        <Setter Property="Margin" Value="2,0"/>
+                        <Setter Property="Padding" Value="0,7"/>
+                        <Setter Property="FontWeight" Value="SemiBold"/>
+                        <Setter Property="FontSize" Value="11.5"/>
+                        <Setter Property="Cursor" Value="Hand"/>
+                        <Setter Property="Foreground" Value="#475569"/>
+                        <Setter Property="HorizontalContentAlignment" Value="Center"/>
+                        <Setter Property="VerticalContentAlignment" Value="Center"/>
+                        <Setter Property="Template">
+                            <Setter.Value>
+                                <ControlTemplate TargetType="ListBoxItem">
+                                    <Border x:Name="bd" Background="#F8FAFC" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="5" Padding="{TemplateBinding Padding}">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock Text="⚡ " FontSize="10.5" Foreground="#0284C7" x:Name="tbBolt"/>
+                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </StackPanel>
+                                    </Border>
+                                    <ControlTemplate.Triggers>
+                                        <Trigger Property="IsMouseOver" Value="True">
+                                             <Setter TargetName="bd" Property="Background" Value="#F0F9FF"/>
+                                             <Setter TargetName="bd" Property="BorderBrush" Value="#38BDF8"/>
+                                             <Setter Property="Foreground" Value="#0284C7"/>
+                                         </Trigger>
+                                         <Trigger Property="IsSelected" Value="True">
+                                             <Setter TargetName="bd" Property="Background" Value="#0284C7"/>
+                                             <Setter TargetName="bd" Property="BorderBrush" Value="#0284C7"/>
+                                             <Setter Property="Foreground" Value="#FFFFFF"/>
+                                             <Setter TargetName="tbBolt" Property="Foreground" Value="#FFFFFF"/>
+                                             <Setter Property="FontWeight" Value="Bold"/>
+                                         </Trigger>
+                                     </ControlTemplate.Triggers>
+                                 </ControlTemplate>
+                             </Setter.Value>
+                         </Setter>
+                     </Style>
+                 </ListBox.ItemContainerStyle>
+             </ListBox>
+         </Border>
+
+        <!-- ROW 2: COMPACT SERVICE ACTION CANVAS (SNUG, NO STRETCHING, 0-VOID) -->
+        <TabControl Grid.Row="2" SelectedIndex="{Binding SelectedBrandTabIndex, Mode=TwoWay}" BorderThickness="0" Background="Transparent" VerticalAlignment="Top" Margin="0,0,0,4">
+            <TabControl.ItemContainerStyle>
+                <Style TargetType="TabItem">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                </Style>
+            </TabControl.ItemContainerStyle>
+
+            <!-- INDEX 0: ⚡ SAMSUNG (ODIN / AT / FRP) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: FRP & Screen Lock -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ KUNCI LAYAR &amp; FRP" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="📋 Panduan *#0*# (Service Menu)" Command="{Binding BypassFrpSamsungServiceMenuCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Panduan langkah-langkah bypass FRP via kode darurat *#0*# — membutuhkan interaksi layar HP langsung"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Bypass FRP (MTP ADB Auto)" Command="{Binding BypassFrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Kirim payload ADB otomatis via port AT Modem Samsung — HP harus sudah terdeteksi ADB atau terhubung MTP"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Factory Reset CSC" Command="{Binding SamsungFactoryResetCscCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Reset data pabrik via AT Command CSC"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash Bit (EDL 9008)" Command="{Binding SamsungEdlFlashBitCommand}" Height="34" FontSize="12" ToolTip="Flash bootloader bit loader via EDL"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Mode & Power -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="📥 MODE &amp; POWER CONTROL" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="📥 Masuk Download Mode" Command="{Binding RebootDownloadCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Reboot MTP langsung ke Odin Download Mode"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery Mode" Command="{Binding RebootRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="ℹ️ Read Device Info (AT)" Command="{Binding DeviceInfoCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Security & EFS -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 KEAMANAN &amp; EFS SAMSUNG" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup EFS Partition" Command="{Binding SamsungBackupEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore EFS Partition" Command="{Binding SamsungRestoreEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Baseband / Radio" Command="{Binding FixBasebandCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Repair / Write IMEI" Command="{Binding RepairImeiCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Special Samsung Operations -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ LAYANAN ODIN &amp; KHUSUS" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🛡️ Cek Knox / KG State" Command="{Binding SamsungKnoxCheckCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Mulai Flash 4-File Odin" Command="{Binding FlashSamsungOdinCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🧹 Reset File Odin" Command="{Binding ClearSamsungOdinFilesCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Force Reset USB Port" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 1: ⚡ MEDIATEK (MTK BROM / PRELOADER) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: FRP & Format Userdata -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ KUNCI LAYAR &amp; FRP" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Erase FRP (BROM)" Command="{Binding MtkBypassFrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Hapus kunci akun Google via BROM"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Format Userdata (Safe)" Command="{Binding MtkFormatUserdataCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Hapus pola/PIN layar aman tanpa hilang sinyal"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Background="#DC2626" BorderBrush="#DC2626" Content="⚡ Force BROM (Crash PL)" Command="{Binding MtkCrashPreloaderCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Paksa masuk BROM mode dari Preloader"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🛡️ Bypass SLA / DAA Auth" Command="{Binding AuthBypassCommand}" Height="34" FontSize="12" ToolTip="Bypass autentikasi SLA/DAA MTK"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Bootloader & Mode -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="🔓 BOOTLOADER &amp; MODE" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔓 Unlock BL (UBL Instant)" Command="{Binding MtkUnlockBootloaderCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Buka kunci bootloader instan tanpa waktu tunggu via modifikasi seccfg"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔒 Relock Bootloader" Command="{Binding MtkRelockBootloaderCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Kunci kembali bootloader ke status official locked (AVB aktif)"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Kirim instruksi hardware reset untuk keluar dari BROM dan menyalakan HP normal"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot BROM / Preloader" Command="{Binding MtkRebootCommand}" Height="34" FontSize="12" ToolTip="Paksa transisi Preloader ke BROM murni atau panduan tombol fisik hardware"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Security & NVRAM -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 KEAMANAN &amp; NVRAM" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup NVRAM / NVDATA" Command="{Binding MtkBackupNvramCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Cadangkan partisi nvram, nvdata, dan nvcfg untuk proteksi IMEI &amp; Baseband"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore NVRAM / NVDATA" Command="{Binding MtkRestoreNvramCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Pulihkan partisi NVRAM/NVDATA dari direktori cadangan biner (.bin)"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📑 Read GPT Partition Table" Command="{Binding MtkReadGptCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Baca dan tampilkan tabel susunan partisi GUID (GPT) dari eMMC/UFS"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Baseband Radio MTK" Command="{Binding FixBasebandCommand}" Height="34" FontSize="12" ToolTip="Perbaiki Baseband Unknown / Sinyal Hilang via injeksi kalibrasi NVRAM bersih"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Special MTK Operations -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ OPERASI KHUSUS MTK" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Permanent Disable DAA" Command="{Binding AuthBypassCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Nonaktifkan autentikasi DAA MTK secara permanen"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📦 Dump Partisi eMMC / UFS" Command="{Binding ReadPartitionCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Baca dan ekstrak partisi mentah dari chip memori eMMC/UFS"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Repair / Write IMEI" Command="{Binding RepairImeiCommand}" Height="34" FontSize="12" ToolTip="Tulis ulang nomor IMEI resmi perangkat MediaTek"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port COM USB" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12" ToolTip="Bersihkan buffer COM port yang macet dan refresh Device Manager Windows"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 2: ⚡ QUALCOMM (EDL 9008 / FIREHOSE) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: FRP & Format EDL -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ KUNCI LAYAR &amp; FRP" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Erase FRP (EDL 9008)" Command="{Binding EdlBypassFrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Format Userdata (EDL)" Command="{Binding EdlFormatUserdataCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📑 Read GPT via Firehose" Command="{Binding EdlReadGptCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Auto-Detect Firehose" Command="{Binding EnsureLoaderCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Mode & Power Control -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="📥 MODE &amp; POWER CONTROL" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot EDL ke Normal" Command="{Binding EdlRebootCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot EDL ke EDL 9008" Command="{Binding RebootEdlCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery Mode" Command="{Binding RebootRecoveryCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: QCN & Baseband -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 KALIBRASI QCN &amp; NV" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup EFS (EDL 9008)" Command="{Binding EdlBackupEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore EFS (EDL 9008)" Command="{Binding EdlRestoreEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Enable Diag Port (ADB)" Command="{Binding EnableQualcommDiagPortCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Repair IMEI / MEID" Command="{Binding RepairImeiCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Operations & Flash -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ OPERASI FIREHOSE" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🚀 Kirim Loader Sahara" Command="{Binding EdlFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash RawProgram XML" Command="{Binding StartFirmwareFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📦 Dump Partisi Terpilih" Command="{Binding ReadPartitionCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port 9008" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 3: ⚡ XIAOMI / REDMI (SIDELOAD / MI CLOUD) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Mi Cloud & Sideload -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ MI CLOUD &amp; SIDELOAD" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="🛡️ Bypass Mi Cloud (EDL/Sideload)" Command="{Binding RemoveMiAccountCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Sideload Format Userdata" Command="{Binding XiaomiSideloadFormatCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Sideload Erase FRP" Command="{Binding XiaomiSideloadFrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="🛡️ Anti-Relock Mi Account" Command="{Binding XiaomiAntiRelockCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Bootloader & Fastboot -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="🔓 BOOTLOADER &amp; MODE" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔓 Unlock BL (Fastboot UBL)" Command="{Binding UnlockBootloaderCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Boot to EDL 9008" Command="{Binding RebootEdlCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Sideload ke Normal" Command="{Binding XiaomiSideloadRebootCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery / Sideload" Command="{Binding RebootRecoveryCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: NV Data & Baseband -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 NV DATA &amp; KEAMANAN" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🛠️ Fix NV Data Corrupted" Command="{Binding RepairEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup EFS / NVRAM" Command="{Binding XiaomiBackupEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore EFS / NVRAM" Command="{Binding XiaomiRestoreEfsCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Baseband Radio" Command="{Binding FixBasebandCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Special Xiaomi Operations -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ LAYANAN HYPEROS / MIUI" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="ℹ️ Read Info Sideload" Command="{Binding XiaomiSideloadInfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Sideload Flash OTA.zip" Command="{Binding XiaomiSideloadFlashOtaCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Dual SIM IMEI Repair" Command="{Binding RepairImeiCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port USB" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 4: ⚡ FASTBOOT MODE (UNIVERSAL) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Fastboot FRP & Wipe -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ KUNCI LAYAR &amp; FRP" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Erase FRP (Fastboot)" Command="{Binding FastbootEraseFrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Format Userdata" Command="{Binding FormatCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="ℹ️ Read Info (getvar all)" Command="{Binding DeviceInfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Wipe Cache Partition" Command="{Binding FastbootWipeCacheCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Bootloader (Fastboot) -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="🔓 BOOTLOADER (FASTBOOT)" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔓 OEM / Flashing Unlock" Command="{Binding UnlockBootloaderCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔒 OEM / Flashing Lock" Command="{Binding FastbootLockCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot ke Bootloader" Command="{Binding FastbootRebootBootloaderCommand}" Height="34" FontSize="12" ToolTip="Kirim instruksi fastboot reboot-bootloader"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Mode Navigation -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="📥 NAVIGASI MODE" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot ke Recovery" Command="{Binding RebootRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot ke EDL 9008" Command="{Binding RebootEdlCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Set Active Slot (A/B)" Command="{Binding FastbootSetActiveSlotCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Boot Temporary Kernel" Command="{Binding BootRecoveryCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Flash Partition Fastboot -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ FLASH PARTISI FASTBOOT" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash TWRP Recovery" Command="{Binding FlashTwrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash Boot / Kernel" Command="{Binding StartFirmwareFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash Super / System" Command="{Binding StartFirmwareFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port Fastboot" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 5: ⚡ UNISOC / SPRD (PAC FLASHER) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: FRP & Format Unisoc -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ KUNCI LAYAR &amp; FRP" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Erase FRP (SPRD Diag)" Command="{Binding UnisocBypassFrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Format Userdata (SPRD)" Command="{Binding UnisocFormatUserdataCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="ℹ️ Read Device Info (Diag)" Command="{Binding UnisocInfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Bypass Screen Lock" Command="{Binding UnisocFormatUserdataCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Mode & Power -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="📥 MODE &amp; POWER (UNISOC)" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding UnisocRebootCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery Mode" Command="{Binding RebootRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Force Diag Mode" Command="{Binding UnisocInfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port COM USB" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Security & NV Unisoc -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 KEAMANAN &amp; NV SPRD" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup NV Unisoc" Command="{Binding UnisocBackupNvCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore NV Unisoc" Command="{Binding UnisocRestoreNvCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Baseband Unisoc" Command="{Binding FixBasebandCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Repair / Write IMEI" Command="{Binding RepairImeiCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Flasher PAC Unisoc -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ FLASHER PAC UNISOC" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Mulai Flash File .PAC" Command="{Binding FlashUnisocPacCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📂 Pilih File .PAC Firmware" Command="{Binding BrowseUnisocPacCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📑 Validasi PAC Header" Command="{Binding ValidateUnisocPacHeaderCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Validasi integritas magic header dan partisi biner PAC"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Auto-Detect FDL Loader" Command="{Binding UnisocInfoCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 6: ⚡ HUAWEI (KIRIN / FASTBOOT) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Huawei ID & FRP -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ HUAWEI ID &amp; FRP" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Bypass Huawei ID (Kirin)" Command="{Binding HuaweiBypassIdCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Factory Reset / Format" Command="{Binding FormatCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="ℹ️ Read Info Device Kirin" Command="{Binding HuaweiInfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Erase FRP (Fastboot)" Command="{Binding FastbootEraseFrpCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Mode & Fastboot Huawei -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="📥 MODE &amp; FASTBOOT HUAWEI" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="📥 Masuk Fastboot Mode" Command="{Binding HuaweiRebootFastbootCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery Mode" Command="{Binding RebootRecoveryCommand}" Height="34" FontSize="12"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔓 Unlock BL (Fastboot)" Command="{Binding UnlockBootloaderCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: OEMINFO & Security -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 OEMINFO &amp; KEAMANAN" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Read OEMINFO Backup" Command="{Binding HuaweiReadOeminfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore OEMINFO" Command="{Binding HuaweiRestoreOeminfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Baseband Radio" Command="{Binding FixBasebandCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Repair / Write IMEI" Command="{Binding RepairImeiCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Operations & Flash -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ OPERASI KHUSUS HUAWEI" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash Fastboot Firmware" Command="{Binding StartFirmwareFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash eRecovery" Command="{Binding FlashTwrpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port Kirin 1.0" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🧹 Bersihkan Log" Command="{Binding ClearLogCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 7: ⚡ DEMO FIX (VIVO / OPPO / REALME) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Hapus Demo Toko -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="⚡ HAPUS DEMO TOKO" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Hapus Demo Vivo (AT/BROM)" Command="{Binding VivoRemoveDemoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Hapus Demo Oppo / Realme" Command="{Binding OppoRemoveDemoCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Format Userdata Bersih" Command="{Binding MtkFormatUserdataCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Erase FRP Demo Device" Command="{Binding MtkBypassFrpCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Mode & Power -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="🔓 MODE &amp; BOOTLOADER" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery Mode" Command="{Binding RebootRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot BROM / EDL Mode" Command="{Binding RebootDownloadCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="ℹ️ Cek Versi Firmware Demo" Command="{Binding DeviceInfoCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Security & NVRAM -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 KEAMANAN &amp; NVRAM" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup NVRAM / Security" Command="{Binding MtkBackupNvramCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore NVRAM / Security" Command="{Binding MtkRestoreNvramCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Sinyal Post-Demo" Command="{Binding FixBasebandCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Repair / Write IMEI" Command="{Binding RepairImeiCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: OFP Utilities -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ UTILITAS FIRMWARE OFP" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📂 Ekstrak Oppo OFP Firmware" Command="{Binding ExtractOfpCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash Extracted OFP" Command="{Binding FlashExtractedFilesCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🛡️ Bypass SLA Auth Oppo" Command="{Binding AuthBypassCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port USB" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 8: ⚡ APPLE IOS (RECOVERY / DFU / INFO) -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Identitas & Diagnostik iOS -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🛡️ IDENTITAS &amp; DIAGNOSTIK" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="ℹ️ Read Device Info (iOS)" Command="{Binding AppleReadInfoCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Baca parameter Model, UDID, ECID, dan Versi iOS"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔋 Cek Parameter Baterai" Command="{Binding AppleCheckBatteryHealthCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Baca status kesehatan baterai &amp; siklus charge"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📱 Cek Status Lockdownd" Command="{Binding AppleCheckLockdowndStatusCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Verifikasi pairing record dan handshake daemon port 62078"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Diagnostik USB Mux" Command="{Binding AppleDiagnoseUsbMuxCommand}" Height="34" FontSize="12" ToolTip="Uji pipe transport usbmuxd dan endpoint USB"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Mode Control iOS -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="📥 MODE KONTROL (IOS)" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="📥 Masuk Recovery Mode" Command="{Binding AppleEnterRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="🔄 Keluar Recovery (Exit)" Command="{Binding AppleExitRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding AppleRebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📋 Panduan Tombol DFU Mode" Command="{Binding AppleShowDfuGuideCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Backup & Restore iOS -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 CADANGAN &amp; PEMULIHAN" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup Data via Apple API" Command="{Binding AppleBackupCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore Cadangan Apple" Command="{Binding AppleRestoreCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Status Koneksi USB" Command="{Binding AppleDiagnoseUsbMuxCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🧹 Bersihkan Log Konsol" Command="{Binding ClearLogCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Flashing IPSW -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ FLASHING &amp; UTILITAS IPSW" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Flash IPSW Firmware" Command="{Binding StartFirmwareFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📂 Pilih Berkas IPSW" Command="{Binding BrowseFirmwareFileCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Fix Bootloop Logo Apple" Command="{Binding AppleExitRecoveryCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📋 Salin Serial / UDID" Command="{Binding CopyLogCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+
+            <!-- INDEX 9: ⚡ REFURBISHED ROM AUDIT & CLEANER -->
+            <TabItem>
+                <Grid Margin="0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Card 1: Audit Keaslian Hardware -->
+                    <Border Grid.Column="0" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="0,0,4,0">
+                        <StackPanel>
+                            <TextBlock Text="🔍 AUDIT KEASLIAN HARDWARE" FontWeight="Bold" FontSize="11" Foreground="#0369A1" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="🔍 Audit ROM Distributor / Fake" Command="{Binding AuditRefurbishedRomCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Audit fingerprint ROM, bloatware toko, dan identitas asli"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔍 Cek Sensor Fisik Asli" Command="{Binding AuditPhysicalSensorsCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Uji keberadaan sensor fisik Gyro/Accel/Proximity asli"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔍 Cek Resolusi Layar &amp; GPU" Command="{Binding AuditDisplayGpuCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Baca resolusi frame buffer asli &amp; driver GPU OpenGL"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔍 Cek RAM &amp; eMMC Asli" Command="{Binding AuditRamStorageCommand}" Height="34" FontSize="12" ToolTip="Baca kapasitas RAM kernel murni &amp; serial CID eMMC/UFS"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 2: Pembersihan Malware -->
+                    <Border Grid.Column="1" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="🧹 PEMBERSIHAN BLOATWARE" FontWeight="Bold" FontSize="11" Foreground="#7E22CE" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernDangerButton}" Content="🗑️ Hapus Bloatware Distributor" Command="{Binding CleanRefurbishedRomCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Bersihkan adware dan aplikasi pelacak toko"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="🛡️ Hapus Adware &amp; Backdoor" Command="{Binding CleanRefurbishedRomCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Normalisasi sistem ke kondisi stock bersih"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔄 Reboot Normal (System)" Command="{Binding RebootNormalCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Reboot Recovery Mode" Command="{Binding RebootRecoveryCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 3: Cadangan Partisi Asli -->
+                    <Border Grid.Column="2" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="2,0,2,0">
+                        <StackPanel>
+                            <TextBlock Text="💾 CADANGAN PARTISI ASLI" FontWeight="Bold" FontSize="11" Foreground="#15803D" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernSuccessButton}" Content="💾 Backup Partisi Aman (Dump)" Command="{Binding ReadPartitionCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📥 Restore Partisi Asli" Command="{Binding WritePartitionCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Verifikasi IMEI Asli Pabrik" Command="{Binding RepairImeiCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📶 Fix Sinyal Hilang" Command="{Binding FixBasebandCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Card 4: Flash ROM Global Resmi -->
+                    <Border Grid.Column="3" Background="#FFFFFF" BorderBrush="#E2E8F0" BorderThickness="1" CornerRadius="6" Padding="10,8" Margin="4,0,0,0">
+                        <StackPanel>
+                            <TextBlock Text="🛠️ FLASH ROM RESMI" FontWeight="Bold" FontSize="11" Foreground="#B45309" Margin="0,0,0,6"/>
+                            <Button Style="{StaticResource ModernPrimaryButton}" Content="⚡ Flash ROM Global Resmi" Command="{Binding StartFirmwareFlashCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📂 Pilih Paket Fastboot ROM" Command="{Binding BrowseFirmwareFileCommand}" Height="34" Margin="0,0,0,5" FontSize="11"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🔒 Kunci Kembali Bootloader" Command="{Binding FastbootLockCommand}" Height="34" Margin="0,0,0,5" FontSize="11" ToolTip="Kunci kembali bootloader ke status official locked (AVB aktif)"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="⚡ Reset Port COM USB" Command="{Binding ForceResetUsbPortsCommand}" Height="34" FontSize="12"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- ROW 3: OPERATION PROGRESS BAR -->
+        <Grid Grid.Row="3" Margin="0,4,0,6">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Text="Status: " Foreground="{StaticResource TextSecondaryBrush}" FontSize="11"/>
+                <TextBlock Text="{Binding CurrentOperation}" FontWeight="Bold" FontSize="11" Foreground="{StaticResource TextPrimaryBrush}"/>
+            </StackPanel>
+            <TextBlock Grid.Column="1" Text="{Binding OperationProgress, StringFormat='{}{0}%'}" FontWeight="Bold" Foreground="#0284C7" FontSize="11"/>
+            <ProgressBar Grid.ColumnSpan="2" Value="{Binding OperationProgress}" Maximum="100" Height="4" VerticalAlignment="Bottom" Margin="0,18,0,0" Foreground="#0284C7" Background="#E2E8F0" BorderThickness="0"/>
+        </Grid>
+
+        <!-- ROW 4: DOCKED LIVE TERMINAL CONSOLE (COMPACT & PROPORTIONAL) -->
+        <Border Grid.Row="4" Background="#0A0F1D" BorderBrush="#1E293B" BorderThickness="1" CornerRadius="8">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Console Title Bar -->
+                <Border Grid.Row="0" Background="#1E293B" CornerRadius="8,8,0,0" Padding="14,6">
+                    <DockPanel>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="8" Height="8" Fill="#10B981" Margin="0,0,8,0"/>
+                            <TextBlock Text="TERMINAL OUTPUT" Foreground="#E2E8F0" FontWeight="Bold" FontSize="11.5" FontFamily="{StaticResource ConsoleFontFamily}"/>
+                        </StackPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Style="{StaticResource ModernActionButton}" Content="⏹️ Stop / Batal" Command="{Binding CancelCurrentOperationCommand}" Padding="12,4" FontSize="11" FontWeight="SemiBold" Background="#991B1B" Foreground="#FEF2F2" BorderThickness="0" Margin="0,0,8,0"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="📋 Salin Log" Command="{Binding CopyLogCommand}" Padding="12,4" FontSize="11" Background="#334155" Foreground="#F8FAFC" BorderThickness="0" Margin="0,0,8,0"/>
+                            <Button Style="{StaticResource ModernActionButton}" Content="🧹 Bersihkan" Command="{Binding ClearLogCommand}" Padding="12,4" FontSize="11" Background="#334155" Foreground="#FCA5A5" BorderThickness="0"/>
+                        </StackPanel>
+                    </DockPanel>
+                </Border>
+
+                <!-- Console Content -->
+                <TextBox Grid.Row="1" x:Name="ConsoleTextBox"
+                         Text="{Binding TerminalLogText, Mode=OneWay}"
+                         Background="#0A0F1D"
+                         Foreground="#38BDF8"
+                         FontFamily="{StaticResource ConsoleFontFamily}"
+                         FontSize="11.5"
+                         FontWeight="Normal"
+                         IsReadOnly="True"
+                         TextWrapping="Wrap"
+                         VerticalScrollBarVisibility="Auto"
+                         HorizontalScrollBarVisibility="Disabled"
+                         BorderThickness="0"
+                         Padding="12,8"
+                         TextChanged="ConsoleTextBox_TextChanged"/>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

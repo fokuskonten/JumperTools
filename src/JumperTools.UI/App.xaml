@@ -1,0 +1,474 @@
+<Application x:Class="JumperTools.UI.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             StartupUri="Views/MainWindow.xaml">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="LightBlue" SecondaryColor="Teal" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesignTheme.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BoolToVisConverter"/>
+
+            <!-- Ultra-Clean Slate & Cobalt Palette -->
+            <SolidColorBrush x:Key="AppBackgroundBrush" Color="#F8FAFC"/>
+            <SolidColorBrush x:Key="CardBackgroundBrush" Color="#FFFFFF"/>
+            <SolidColorBrush x:Key="CardBorderBrush" Color="#E2E8F0"/>
+            <SolidColorBrush x:Key="TextPrimaryBrush" Color="#0F172A"/>
+            <SolidColorBrush x:Key="TextSecondaryBrush" Color="#475569"/>
+            <SolidColorBrush x:Key="TextMutedBrush" Color="#64748B"/>
+            <SolidColorBrush x:Key="AccentPrimaryBrush" Color="#0284C7"/>
+            <SolidColorBrush x:Key="AccentHoverBrush" Color="#0369A1"/>
+            
+            <!-- Semantic Badge Colors (Solid, Crisp, Enterprise Grade, Zero Pastel Ambiguity) -->
+            <SolidColorBrush x:Key="TagBlueBg" Color="#F1F5F9"/>
+            <SolidColorBrush x:Key="TagBlueText" Color="#0284C7"/>
+            <SolidColorBrush x:Key="TagBlueBorder" Color="#CBD5E1"/>
+
+            <SolidColorBrush x:Key="TagGreenBg" Color="#F1F5F9"/>
+            <SolidColorBrush x:Key="TagGreenText" Color="#059669"/>
+            <SolidColorBrush x:Key="TagGreenBorder" Color="#CBD5E1"/>
+
+            <SolidColorBrush x:Key="TagAmberBg" Color="#F1F5F9"/>
+            <SolidColorBrush x:Key="TagAmberText" Color="#D97706"/>
+            <SolidColorBrush x:Key="TagAmberBorder" Color="#CBD5E1"/>
+
+            <SolidColorBrush x:Key="TagPurpleBg" Color="#F1F5F9"/>
+            <SolidColorBrush x:Key="TagPurpleText" Color="#7E22CE"/>
+            <SolidColorBrush x:Key="TagPurpleBorder" Color="#CBD5E1"/>
+
+            <SolidColorBrush x:Key="TagRedBg" Color="#F1F5F9"/>
+            <SolidColorBrush x:Key="TagRedText" Color="#DC2626"/>
+            <SolidColorBrush x:Key="TagRedBorder" Color="#CBD5E1"/>
+
+            <SolidColorBrush x:Key="TagGrayBg" Color="#F8FAFC"/>
+            <SolidColorBrush x:Key="TagGrayText" Color="#64748B"/>
+            <SolidColorBrush x:Key="TagGrayBorder" Color="#E2E8F0"/>
+
+            <!-- Fonts -->
+            <FontFamily x:Key="AppFontFamily">Segoe UI, Inter, sans-serif</FontFamily>
+            <FontFamily x:Key="ConsoleFontFamily">Consolas, JetBrains Mono, monospace</FontFamily>
+
+            <!-- Ultra-Clean Compact TextBox Style -->
+            <Style x:Key="SharpTextBox" TargetType="TextBox">
+                <Setter Property="Background" Value="#FFFFFF"/>
+                <Setter Property="Foreground" Value="#0F172A"/>
+                <Setter Property="BorderBrush" Value="#CBD5E1"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Padding" Value="8,6"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TextBox">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5" SnapsToDevicePixels="True">
+                                <ScrollViewer x:Name="PART_ContentHost" Focusable="false" HorizontalScrollBarVisibility="Hidden" VerticalScrollBarVisibility="Hidden" Margin="{TemplateBinding Padding}"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsFocused" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter TargetName="border" Property="BorderThickness" Value="1.5"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#94A3B8"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Clean Card Style -->
+            <Style x:Key="ModernEnterpriseCard" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+            </Style>
+
+            <!-- Enterprise Cards (Pure Solid White, Crisp Border, Zero Colored Wireframe Overlap) -->
+            <Style x:Key="CardAccentBlue" TargetType="Border" BasedOn="{StaticResource ModernEnterpriseCard}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+            <Style x:Key="CardAccentPurple" TargetType="Border" BasedOn="{StaticResource ModernEnterpriseCard}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+            <Style x:Key="CardAccentGreen" TargetType="Border" BasedOn="{StaticResource ModernEnterpriseCard}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+            <Style x:Key="CardAccentAmber" TargetType="Border" BasedOn="{StaticResource ModernEnterpriseCard}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+            <Style x:Key="CardAccentRed" TargetType="Border" BasedOn="{StaticResource ModernEnterpriseCard}">
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="CornerRadius" Value="8"/>
+            </Style>
+
+            <!-- Metric Stat Card -->
+            <Style x:Key="MetricCardContainer" TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource CardBackgroundBrush}"/>
+                <Setter Property="BorderBrush" Value="{StaticResource CardBorderBrush}"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="CornerRadius" Value="8"/>
+                <Setter Property="Padding" Value="12,8"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+            </Style>
+
+            <!-- Clean Button -->
+            <Style x:Key="ModernActionButton" TargetType="Button">
+                <Setter Property="Background" Value="#FFFFFF"/>
+                <Setter Property="Foreground" Value="#0F172A"/>
+                <Setter Property="BorderBrush" Value="#CBD5E1"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="10,5"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#F1F5F9"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter Property="Foreground" Value="#0284C7"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#E2E8F0"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Primary Button (Blue) -->
+            <Style x:Key="ModernPrimaryButton" TargetType="Button" BasedOn="{StaticResource ModernActionButton}">
+                <Setter Property="Background" Value="#0284C7"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#0284C7"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#0369A1"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#0369A1"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#075985"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Success Button (Green) -->
+            <Style x:Key="ModernSuccessButton" TargetType="Button" BasedOn="{StaticResource ModernActionButton}">
+                <Setter Property="Background" Value="#16A34A"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#16A34A"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#15803D"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#15803D"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Danger Button (Red) -->
+            <Style x:Key="ModernDangerButton" TargetType="Button" BasedOn="{StaticResource ModernActionButton}">
+                <Setter Property="Background" Value="#DC2626"/>
+                <Setter Property="Foreground" Value="#FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#DC2626"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="border" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="6" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="border" Property="Background" Value="#B91C1C"/>
+                                    <Setter TargetName="border" Property="BorderBrush" Value="#B91C1C"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Secondary Action Button -->
+            <Style x:Key="ModernSecondaryButton" TargetType="Button" BasedOn="{StaticResource ModernActionButton}">
+                <Setter Property="Background" Value="#F1F5F9"/>
+                <Setter Property="Foreground" Value="#334155"/>
+                <Setter Property="BorderBrush" Value="#CBD5E1"/>
+            </Style>
+
+            <!-- Filter Tag Button (Small) -->
+            <Style x:Key="FilterTagButton" TargetType="Button">
+                <Setter Property="Background" Value="#F1F5F9"/>
+                <Setter Property="Foreground" Value="#334155"/>
+                <Setter Property="BorderBrush" Value="#CBD5E1"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="8,3"/>
+                <Setter Property="Margin" Value="0,0,4,0"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="b" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="4" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="b" Property="Background" Value="#E0F2FE"/>
+                                    <Setter TargetName="b" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter Property="Foreground" Value="#0369A1"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Vertical Sidebar Tab Item (WhatsApp CRM Style: Clean Light) -->
+            <Style x:Key="CrmVerticalTabItem" TargetType="TabItem">
+                <Setter Property="Foreground" Value="#475569"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Height" Value="38"/>
+                <Setter Property="Margin" Value="0,0,0,3"/>
+                <Setter Property="Padding" Value="12,0"/>
+                <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border x:Name="navBorder" Background="Transparent" CornerRadius="6" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}" SnapsToDevicePixels="True" Cursor="Hand">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Left" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="navBorder" Property="Background" Value="#0284C7"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Trigger>
+                                <MultiTrigger>
+                                    <MultiTrigger.Conditions>
+                                        <Condition Property="IsMouseOver" Value="True"/>
+                                        <Condition Property="IsSelected" Value="False"/>
+                                    </MultiTrigger.Conditions>
+                                    <Setter TargetName="navBorder" Property="Background" Value="#F1F5F9"/>
+                                    <Setter Property="Foreground" Value="#0F172A"/>
+                                </MultiTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Default Clean CheckBox Style -->
+            <Style TargetType="CheckBox">
+                <Setter Property="Foreground" Value="#0F172A"/>
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="VerticalContentAlignment" Value="Center"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="Margin" Value="0,2,0,4"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+            </Style>
+
+            <!-- Modern Navigation Tab Item -->
+            <Style x:Key="ModernNavTabItem" TargetType="TabItem">
+                <Setter Property="Foreground" Value="#475569"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="8,4.5"/>
+                <Setter Property="Margin" Value="0,0,3,3"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border x:Name="tabBorder" Background="#FFFFFF" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="5" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}" SnapsToDevicePixels="True" Cursor="Hand">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="tabBorder" Property="Background" Value="#0284C7"/>
+                                    <Setter TargetName="tabBorder" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="tabBorder" Property="BorderBrush" Value="#0284C7"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Modern Chip Tab Item for Responsive Chipset Tabs -->
+            <Style x:Key="ModernChipTabItem" TargetType="TabItem">
+                <Setter Property="Foreground" Value="#475569"/>
+                <Setter Property="FontSize" Value="11"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Padding" Value="11,4"/>
+                <Setter Property="Margin" Value="0,0,4,4"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="TabItem">
+                            <Border x:Name="chipBorder" Background="#F1F5F9" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}" SnapsToDevicePixels="True" Cursor="Hand">
+                                <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="chipBorder" Property="Background" Value="#0284C7"/>
+                                    <Setter TargetName="chipBorder" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="chipBorder" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter TargetName="chipBorder" Property="Background" Value="#E0F2FE"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Clean Custom ListView Item Style (No ugly giant gray highlight) -->
+            <Style x:Key="CleanListViewItem" TargetType="ListViewItem">
+                <Setter Property="Background" Value="Transparent"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="0,0,0,5"/>
+                <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="ListViewItem">
+                            <Border x:Name="itemBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="5" Padding="{TemplateBinding Padding}" SnapsToDevicePixels="True">
+                                <ContentPresenter/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsSelected" Value="True">
+                                    <Setter TargetName="itemBorder" Property="Background" Value="#E0F2FE"/>
+                                    <Setter TargetName="itemBorder" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter TargetName="itemBorder" Property="BorderThickness" Value="1.5"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="itemBorder" Property="Background" Value="#F1F5F9"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- Sharp DataGrid Style -->
+            <Style TargetType="DataGrid">
+                <Setter Property="Background" Value="#FFFFFF"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="GridLinesVisibility" Value="Horizontal"/>
+                <Setter Property="HorizontalGridLinesBrush" Value="#F1F5F9"/>
+                <Setter Property="RowHeight" Value="32"/>
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="Foreground" Value="#0F172A"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+            </Style>
+
+            <Style TargetType="DataGridColumnHeader">
+                <Setter Property="Background" Value="#F8FAFC"/>
+                <Setter Property="Foreground" Value="#334155"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="FontSize" Value="11.5"/>
+                <Setter Property="Padding" Value="8,6"/>
+                <Setter Property="BorderBrush" Value="#E2E8F0"/>
+                <Setter Property="BorderThickness" Value="0,0,0,1"/>
+                <Setter Property="SnapsToDevicePixels" Value="True"/>
+            </Style>
+
+            <!-- Small Info Badge Button Style (Interactive ℹ️ Trigger) -->
+            <Style x:Key="SmallInfoBadgeButton" TargetType="Button">
+                <Setter Property="Background" Value="#EFF6FF"/>
+                <Setter Property="Foreground" Value="#0284C7"/>
+                <Setter Property="BorderBrush" Value="#BAE6FD"/>
+                <Setter Property="BorderThickness" Value="1"/>
+                <Setter Property="Width" Value="20"/>
+                <Setter Property="Height" Value="20"/>
+                <Setter Property="FontSize" Value="10.5"/>
+                <Setter Property="FontWeight" Value="Bold"/>
+                <Setter Property="Cursor" Value="Hand"/>
+                <Setter Property="ToolTip" Value="Klik untuk melihat fungsi dan panduan cara aksinya"/>
+                <Setter Property="Padding" Value="0"/>
+                <Setter Property="Margin" Value="4,0,0,0"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
+                <Setter Property="HorizontalAlignment" Value="Center"/>
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="bd" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10" SnapsToDevicePixels="True">
+                                <TextBlock Text="ℹ️" FontSize="10" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="bd" Property="Background" Value="#DBEAFE"/>
+                                    <Setter TargetName="bd" Property="BorderBrush" Value="#0284C7"/>
+                                    <Setter TargetName="bd" Property="BorderThickness" Value="1.5"/>
+                                </Trigger>
+                                <Trigger Property="IsPressed" Value="True">
+                                    <Setter TargetName="bd" Property="Background" Value="#BFDBFE"/>
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>
